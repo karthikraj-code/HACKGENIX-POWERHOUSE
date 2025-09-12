@@ -1,11 +1,14 @@
 'use client';
 
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { Button } from './ui/button';
 import { Sheet, SheetContent, SheetTrigger, SheetClose, SheetHeader, SheetTitle } from '@/components/ui/sheet';
-import { CodeXml, Route, Sparkles, Book, Languages, Database, Wrench, Menu, Brain, HelpCircle } from 'lucide-react';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from '@/components/ui/dropdown-menu';
+import { CodeXml, Route, Sparkles, Book, Languages, Database, Wrench, Menu, User, LogOut, LayoutDashboard } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { Session } from '@supabase/supabase-js';
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 
 const navLinks = [
   { href: '/career-paths', label: 'Career Paths', icon: Route },
@@ -18,13 +21,24 @@ const navLinks = [
   { href: '/tools', label: 'Tools', icon: Wrench },
 ];
 
-export function Header() {
+interface HeaderProps {
+  session: Session | null;
+}
+
+export function Header({ session }: HeaderProps) {
   const pathname = usePathname();
+  const router = useRouter();
+  const supabase = createClientComponentClient();
+
+  const handleSignOut = async () => {
+    await supabase.auth.signOut();
+    router.refresh();
+  };
 
   return (
     <header className="bg-card border-b sticky top-0 z-50">
       <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-        <Link href="/" className="flex items-center gap-2">
+        <Link href="/home" className="flex items-center gap-2">
           <CodeXml className="h-8 w-8 text-primary" />
           <span className="text-2xl font-bold font-headline">TechNav</span>
         </Link>
@@ -55,6 +69,31 @@ export function Header() {
           <Button asChild variant="ghost">
             <Link href="/tools">Tools Explorer</Link>
           </Button>
+          {session ? (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" className="flex items-center gap-2">
+                  <User className="h-4 w-4" />
+                  Profile
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-48">
+                <DropdownMenuItem asChild>
+                  <Link href="/profile" className="flex items-center gap-2">
+                    <LayoutDashboard className="h-4 w-4" />
+                    Dashboard
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={handleSignOut} className="flex items-center gap-2 text-red-600 focus:text-red-600">
+                  <LogOut className="h-4 w-4" />
+                  Sign Out
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          ) : (
+            null
+          )}
         </nav>
         
         {/* Mobile Navigation */}
@@ -85,6 +124,32 @@ export function Header() {
                       </Link>
                   </SheetClose>
                 ))}
+                {session ? (
+                  <>
+                    <SheetClose asChild>
+                      <Link
+                        href="/profile"
+                        className={cn(
+                          "flex items-center gap-3 rounded-lg p-3 text-lg font-medium text-muted-foreground transition-all hover:text-primary",
+                          pathname === "/profile" && "bg-muted text-primary"
+                        )}
+                      >
+                        Profile
+                      </Link>
+                    </SheetClose>
+                    <SheetClose asChild>
+                      <Button variant="ghost" onClick={handleSignOut}>
+                        Sign Out
+                      </Button>
+                    </SheetClose>
+                  </>
+                ) : (
+                  <SheetClose asChild>
+                    <Button asChild variant="ghost">
+                      <Link href="/auth">Sign In</Link>
+                    </Button>
+                  </SheetClose>
+                )}
               </nav>
             </SheetContent>
           </Sheet>
