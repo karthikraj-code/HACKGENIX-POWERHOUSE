@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { createServerComponentClient } from "@supabase/auth-helpers-nextjs";
 import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
 import { Rocket, Sparkles, BrainCircuit, Layers, ShieldCheck, Workflow } from "lucide-react";
 import { SignInButton } from "@/components/sign-in-button";
 import { ScrollAnimate } from "@/components/scroll-animate";
@@ -8,6 +9,12 @@ import { ScrollAnimate } from "@/components/scroll-animate";
 export default async function LandingPage() {
   const supabase = createServerComponentClient({ cookies });
   const { data } = await supabase.auth.getSession();
+
+  // Redirect signed-in users directly to home
+  if (data.session) {
+    redirect('/home');
+  }
+  
   const mediaUrl = process.env.NEXT_PUBLIC_LANDING_MEDIA_URL;
   const videoSrc = mediaUrl && mediaUrl.endsWith('.mp4') ? mediaUrl : '/media/landing.mp4';
 
@@ -328,15 +335,9 @@ export default async function LandingPage() {
               Explore domains, get AI-powered guidance, and turn learning into real projects with our cutting-edge platform.
             </p>
             <div className="mt-12 flex items-center justify-center gap-4">
-              {data.session ? (
-                <Link href="/home" className="group relative px-8 py-4 bg-white text-gray-900 rounded-xl font-semibold text-lg transition-all duration-300 hover:scale-105 hover:shadow-2xl neon-border">
-                  <span className="relative z-10">Go to Home</span>
-                </Link>
-              ) : (
-                <div className="group relative transition-all duration-300 hover:scale-105 hover:shadow-2xl">
-                  <SignInButton />
-                </div>
-              )}
+              <div className="group relative transition-all duration-300 hover:scale-105 hover:shadow-2xl">
+                <SignInButton />
+              </div>
             </div>
           </div>
         </div>

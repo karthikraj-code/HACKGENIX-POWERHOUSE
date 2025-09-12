@@ -5,6 +5,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import { Button } from './ui/button';
 import { Sheet, SheetContent, SheetTrigger, SheetClose, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from '@/components/ui/dropdown-menu';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { CodeXml, Route, Sparkles, Book, Languages, Database, Wrench, Menu, User, LogOut, LayoutDashboard } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Session } from '@supabase/supabase-js';
@@ -64,12 +65,19 @@ export function Header({ session }: HeaderProps) {
           {session ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="flex items-center gap-2">
-                  <User className="h-4 w-4" />
-                  Profile
+                <Button variant="ghost" className="p-1">
+                  <Avatar className="h-8 w-8">
+                    <AvatarFallback className="bg-primary text-primary-foreground text-sm font-medium">
+                      {session.user.email?.charAt(0).toUpperCase() || 'U'}
+                    </AvatarFallback>
+                  </Avatar>
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-48">
+                <div className="px-2 py-1.5 text-sm text-muted-foreground">
+                  {session.user.email}
+                </div>
+                <DropdownMenuSeparator />
                 <DropdownMenuItem asChild>
                   <Link href="/profile" className="flex items-center gap-2">
                     <LayoutDashboard className="h-4 w-4" />
@@ -77,7 +85,7 @@ export function Header({ session }: HeaderProps) {
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={handleSignOut} className="flex items-center gap-2 text-red-600 focus:text-red-600">
+                <DropdownMenuItem onClick={handleSignOut} className="flex items-center gap-2">
                   <LogOut className="h-4 w-4" />
                   Sign Out
                 </DropdownMenuItem>
@@ -118,6 +126,16 @@ export function Header({ session }: HeaderProps) {
                 ))}
                 {session ? (
                   <>
+                    <div className="flex items-center gap-3 p-3 border-b">
+                      <Avatar className="h-8 w-8">
+                        <AvatarFallback className="bg-primary text-primary-foreground text-sm font-medium">
+                          {session.user.email?.charAt(0).toUpperCase() || 'U'}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div className="text-sm text-muted-foreground">
+                        {session.user.email}
+                      </div>
+                    </div>
                     <SheetClose asChild>
                       <Link
                         href="/profile"
@@ -126,11 +144,13 @@ export function Header({ session }: HeaderProps) {
                           pathname === "/profile" && "bg-muted text-primary"
                         )}
                       >
-                        Profile
+                        <LayoutDashboard className="h-5 w-5" />
+                        Dashboard
                       </Link>
                     </SheetClose>
                     <SheetClose asChild>
-                      <Button variant="ghost" onClick={handleSignOut}>
+                      <Button variant="ghost" onClick={handleSignOut} className="text-red-600 hover:text-red-600">
+                        <LogOut className="h-5 w-5 mr-2" />
                         Sign Out
                       </Button>
                     </SheetClose>
