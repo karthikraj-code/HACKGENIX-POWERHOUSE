@@ -6,7 +6,7 @@ import { Button } from './ui/button';
 import { Sheet, SheetContent, SheetTrigger, SheetClose, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { CodeXml, Route, Sparkles, Book, Languages, Database, Wrench, Menu, User, LogOut, LayoutDashboard } from 'lucide-react';
+import { CodeXml, Route, Sparkles, Book, Languages, Database, Wrench, Menu, User, LogOut, LayoutDashboard, Brain, HelpCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Session } from '@supabase/supabase-js';
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
@@ -117,7 +117,8 @@ export function Header({ session }: HeaderProps) {
               <SheetHeader>
                 <SheetTitle className="sr-only">Menu</SheetTitle>
               </SheetHeader>
-              <nav className="flex flex-col gap-4 mt-8">
+              <div className="mt-8">
+                <nav className="flex flex-col gap-4">
                 {navLinks.map((link) => (
                   <SheetClose key={link.href} asChild>
                       <Link
@@ -170,7 +171,8 @@ export function Header({ session }: HeaderProps) {
                     </Button>
                   </SheetClose>
                 )}
-              </nav>
+                </nav>
+              </div>
             </SheetContent>
           </Sheet>
         </div>
