@@ -29,13 +29,24 @@ export function SignInButton({
       isProcessingRef.current = true;
       setIsLoading(true);
       
+      // Check if Supabase is properly configured
+      const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+      const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+      
+      if (!supabaseUrl || !supabaseKey) {
+        throw new Error('Supabase configuration is missing. Please check your environment variables.');
+      }
+      
       // Clear any existing session first
       await supabase.auth.signOut();
+      
+      const redirectUrl = redirectTo || `${window.location.origin}/auth/callback`;
+      console.log('Attempting OAuth with redirect URL:', redirectUrl);
       
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: redirectTo || `${window.location.origin}/auth/callback`,
+          redirectTo: redirectUrl,
           queryParams: {
             access_type: 'offline',
             prompt: 'consent',
@@ -44,6 +55,7 @@ export function SignInButton({
       });
 
       if (error) {
+        console.error('OAuth error details:', error);
         throw error;
       }
 
