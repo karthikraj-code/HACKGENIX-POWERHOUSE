@@ -1,7 +1,7 @@
 'use client';
 
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 
 interface SignInButtonProps {
   redirectTo?: string;
@@ -20,17 +20,26 @@ export function SignInButton({
 }: SignInButtonProps = {}) {
   const [isLoading, setIsLoading] = useState(false);
   const supabase = createClientComponentClient();
+  const isProcessingRef = useRef(false);
 
   const signInWithGoogle = async () => {
-    if (disabled || isLoading) return;
+    if (disabled || isLoading || isProcessingRef.current) return;
 
     try {
+      isProcessingRef.current = true;
       setIsLoading(true);
+      
+      // Clear any existing session first
+      await supabase.auth.signOut();
       
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
           redirectTo: redirectTo || `${window.location.origin}/auth/callback`,
+          queryParams: {
+            access_type: 'offline',
+            prompt: 'consent',
+          },
         },
       });
 
@@ -42,9 +51,10 @@ export function SignInButton({
     } catch (error) {
       console.error('Sign in error:', error);
       onError?.(error instanceof Error ? error : new Error('An unknown error occurred'));
-    } finally {
       setIsLoading(false);
+      isProcessingRef.current = false;
     }
+    // Don't reset loading state here as we're redirecting
   };
 
   const baseClassName = `

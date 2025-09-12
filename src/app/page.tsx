@@ -6,9 +6,14 @@ import { Rocket, Sparkles, BrainCircuit, Layers, ShieldCheck, Workflow } from "l
 import { SignInButton } from "@/components/sign-in-button";
 import { ScrollAnimate } from "@/components/scroll-animate";
 
-export default async function LandingPage() {
+export default async function LandingPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ error?: string }>;
+}) {
   const supabase = createServerComponentClient({ cookies });
   const { data } = await supabase.auth.getSession();
+  const params = await searchParams;
 
   // Redirect signed-in users directly to home
   if (data.session) {
@@ -334,7 +339,12 @@ export default async function LandingPage() {
             <p className="mt-6 text-xl text-white/90 max-w-3xl mx-auto leading-relaxed drop-shadow-lg">
               Explore domains, get AI-powered guidance, and turn learning into real projects with our cutting-edge platform.
             </p>
-            <div className="mt-12 flex items-center justify-center gap-4">
+            <div className="mt-12 flex flex-col items-center justify-center gap-4">
+              {params.error && (
+                <div className="bg-red-500/20 border border-red-500/50 rounded-lg px-4 py-2 text-red-100 text-sm max-w-md text-center">
+                  Authentication failed. Please try again.
+                </div>
+              )}
               <div className="group relative transition-all duration-300 hover:scale-105 hover:shadow-2xl">
                 <SignInButton />
               </div>
