@@ -23,9 +23,9 @@ In your Supabase project settings, add these redirect URLs:
 http://localhost:9002/auth/callback
 ```
 
-**For Production:**
+**For Production (Vercel):**
 ```
-https://your-production-domain.com/auth/callback
+https://tech-navigation.vercel.app/auth/callback
 ```
 
 ### 3. Google OAuth Setup
@@ -48,6 +48,14 @@ https://your-production-domain.com/auth/callback
 
 ### Issue 3: Session not created after OAuth
 **Solution:** Verify the callback URL matches exactly in all configurations
+
+### Issue 4: 307 Temporary Redirect on Vercel
+**Solution:** This is usually caused by:
+- Vercel's automatic HTTPS redirect (normal behavior)
+- Missing environment variables causing redirect loops
+- OAuth redirect URL mismatches
+
+**Fix:** Ensure all environment variables are set in Vercel dashboard
 
 ## Testing Production Setup
 
