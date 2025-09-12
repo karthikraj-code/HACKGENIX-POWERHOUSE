@@ -7,7 +7,7 @@ export default function SummarizerPage() {
       <header className="text-center mb-12">
         <h1 className="text-4xl md:text-6xl font-bold font-headline">AI Resource Summarizer</h1>
         <p className="text-lg text-muted-foreground max-w-3xl mx-auto mt-4">
-          Paste any article, blog post, or documentation content below to get a concise summary from our AI.
+          Paste any article, blog post, or documentation content below, or upload a PDF file to get a concise summary from our AI.
         </p>
       </header>
       <div className="max-w-4xl mx-auto">

@@ -15,6 +15,8 @@ const navLinks = [
   { href: '/career-paths', label: 'Career Paths', icon: Route },
   { href: '/project-generator', label: 'Project Generator', icon: Sparkles },
   { href: '/summarizer', label: 'AI Summarizer', icon: Book },
+  { href: '/flashcardandmindmaps', label: 'Flashcards & Mindmaps', icon: Brain },
+  { href: '/quizzes', label: 'Quizzes', icon: HelpCircle },
   { href: '/languages', label: 'Languages', icon: Languages },
   { href: '/databases', label: 'Databases', icon: Database },
   { href: '/tools', label: 'Tools', icon: Wrench },
@@ -52,6 +54,12 @@ export function Header({ session }: HeaderProps) {
           </Button>
           <Button asChild variant="ghost">
             <Link href="/summarizer" className="flex items-center gap-2"><Book/> AI Summarizer</Link>
+          </Button>
+          <Button asChild variant="ghost">
+            <Link href="/flashcardandmindmaps" className="flex items-center gap-2"><Brain/> Flashcards & Mindmaps</Link>
+          </Button>
+          <Button asChild variant="ghost">
+            <Link href="/quizzes" className="flex items-center gap-2"><HelpCircle/> Quizzes</Link>
           </Button>
           <Button asChild variant="ghost">
             <Link href="/languages">Programming Languages</Link>
