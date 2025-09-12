@@ -60,7 +60,7 @@ export function TechNewsBot() {
                 <div className="space-y-2 max-h-64 overflow-y-auto pr-2">
                     {botResponse.news.map((item, index) => (
                         <div key={index} className="p-3 rounded-md border bg-background/70 text-card-foreground text-left">
-                            <h4 className="font-semibold text-sm">{item.title}</h4>
+                            <h4 className="font-semibold text-sm"><a href={item.url || `https://www.google.com/search?q=${encodeURIComponent(item.title)}`} target="_blank" rel="noopener noreferrer" className="hover:underline text-primary">{item.title}</a></h4>
                             {item.source && <p className="text-xs text-muted-foreground/80 mb-1">{item.source}</p>}
                             <p className="text-xs">{item.summary}</p>
                         </div>
