@@ -7,7 +7,7 @@ export default function LanguagesPage() {
   return (
     <div className="container mx-auto px-4 py-8 md:py-16">
       <header className="text-center mb-12">
-        <h1 className="text-4xl md:text-6xl font-bold font-headline">Programming Languages</h1>
+        <h1 className="text-4xl md:text-6xl font-bold font-headline">Programming Languages!</h1>
         <p className="text-lg text-muted-foreground max-w-3xl mx-auto mt-4">
           Explore foundational programming languages for various tech domains!!.
         </p>
