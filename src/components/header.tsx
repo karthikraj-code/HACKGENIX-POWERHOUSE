@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Button } from './ui/button';
 import { Sheet, SheetContent, SheetTrigger, SheetClose, SheetHeader, SheetTitle } from '@/components/ui/sheet';
-import { CodeXml, Route, Sparkles, Book, Languages, Database, Wrench, Menu, Brain } from 'lucide-react';
+import { CodeXml, Route, Sparkles, Book, Languages, Database, Wrench, Menu, Brain, HelpCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const navLinks = [
@@ -12,6 +12,7 @@ const navLinks = [
   { href: '/project-generator', label: 'Project Generator', icon: Sparkles },
   { href: '/summarizer', label: 'AI Summarizer', icon: Book },
   { href: '/flashcardandmindmaps', label: 'Flashcards & Mindmaps', icon: Brain },
+  { href: '/quizzes', label: 'Quizzes', icon: HelpCircle },
   { href: '/languages', label: 'Languages', icon: Languages },
   { href: '/databases', label: 'Databases', icon: Database },
   { href: '/tools', label: 'Tools', icon: Wrench },
@@ -41,6 +42,9 @@ export function Header() {
           </Button>
           <Button asChild variant="ghost">
             <Link href="/flashcardandmindmaps" className="flex items-center gap-2"><Brain/> Flashcards & Mindmaps</Link>
+          </Button>
+          <Button asChild variant="ghost">
+            <Link href="/quizzes" className="flex items-center gap-2"><HelpCircle/> Quizzes</Link>
           </Button>
           <Button asChild variant="ghost">
             <Link href="/languages">Programming Languages</Link>
