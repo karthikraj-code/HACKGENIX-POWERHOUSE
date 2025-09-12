@@ -74,7 +74,7 @@ export function TechNewsBot() {
   };
 
   return (
-    <div className="fixed bottom-6 right-6 z-50">
+    <div className="fixed bottom-6 right-6 z-50" data-tech-bot-root>
       <Popover>
         <PopoverTrigger asChild>
           <Button size="lg" className="rounded-full h-16 w-16 bg-gradient-to-r from-primary to-accent text-primary-foreground shadow-lg transition-transform hover:scale-110 hover:shadow-xl">
