@@ -7,6 +7,8 @@ import { redirect } from "next/navigation";
 export default async function HomePage() {
   const supabase = createServerComponentClient({ cookies });
   const { data } = await supabase.auth.getSession();
+  
+  // If no session, redirect to landing page
   if (!data.session) {
     redirect("/");
   }

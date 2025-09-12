@@ -23,12 +23,25 @@ export async function GET(request: NextRequest) {
         console.error('Session exchange error:', exchangeError);
         return NextResponse.redirect(`${requestUrl.origin}/?error=session_exchange_failed`);
       }
+
+      // Verify session was created successfully
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        console.error('No session created after code exchange');
+        return NextResponse.redirect(`${requestUrl.origin}/?error=no_session_created`);
+      }
+
+      // Small delay to ensure session is properly established
+      await new Promise(resolve => setTimeout(resolve, 100));
+
+      // URL to redirect to after sign in process completes
+      return NextResponse.redirect(`${requestUrl.origin}/home`);
     } catch (error) {
       console.error('Auth callback error:', error);
       return NextResponse.redirect(`${requestUrl.origin}/?error=auth_callback_failed`);
     }
   }
 
-  // URL to redirect to after sign in process completes
+  // If no code, redirect to home anyway (might be a refresh)
   return NextResponse.redirect(`${requestUrl.origin}/home`);
 }
