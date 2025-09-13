@@ -7,17 +7,14 @@ import { SignInButton } from "@/components/sign-in-button";
 import { ScrollAnimate } from "@/components/scroll-animate";
 import { EnvCheck } from "@/components/env-check";
 
-export default async function LandingPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ error?: string; description?: string }>;
-}) {
-  const supabase = createServerComponentClient({ cookies });
-  const { data } = await supabase.auth.getSession();
-  const params = await searchParams;
+export default async function LandingPage() {
+  const cookieStore = await cookies();
+  const supabase = createServerComponentClient({ cookies: () => cookieStore });
+  const { data: { user } } = await supabase.auth.getUser();
+
 
   // Redirect signed-in users directly to home
-  if (data.session) {
+  if (user) {
     redirect('/home');
   }
   
