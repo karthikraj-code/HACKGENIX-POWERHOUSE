@@ -24,6 +24,8 @@ const AiResourceSummarizerOutputSchema = z.object({
 export type AiResourceSummarizerOutput = z.infer<typeof AiResourceSummarizerOutputSchema>;
 
 export async function aiResourceSummarizer(input: AiResourceSummarizerInput): Promise<AiResourceSummarizerOutput> {
+  console.log(`📊 [AI SUMMARIZER] Content length: ${input.resourceContent?.length || 0} characters`);
+  console.log(`📊 [AI SUMMARIZER] Content preview: ${input.resourceContent?.substring(0, 200)}...`);
   return aiResourceSummarizerFlow(input);
 }
 

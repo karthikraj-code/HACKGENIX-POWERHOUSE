@@ -35,9 +35,14 @@ export function parseMindmap(markdown: string): MindmapNode | null {
       if (!root) {
         root = node;
       } else {
-        // This case handles multiple root-level items. We can either error, or create a virtual root.
-        // For simplicity, we'll treat the first item as the single root.
-        // If your mindmap has multiple roots, consider wrapping it in a single top-level item.
+        // Handle multiple root-level items by creating a virtual root with empty content
+        const virtualRoot: MindmapNode = {
+          id: 'virtual-root',
+          content: '', // Empty content to avoid showing "Topics"
+          children: [root, node],
+          depth: -1
+        };
+        root = virtualRoot;
       }
     }
 

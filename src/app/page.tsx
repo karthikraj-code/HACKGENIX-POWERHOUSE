@@ -7,11 +7,12 @@ import { SignInButton } from "@/components/sign-in-button";
 import { ScrollAnimate } from "@/components/scroll-animate";
 
 export default async function LandingPage() {
-  const supabase = createServerComponentClient({ cookies });
-  const { data } = await supabase.auth.getSession();
+  const cookieStore = await cookies();
+  const supabase = createServerComponentClient({ cookies: () => cookieStore });
+  const { data: { user } } = await supabase.auth.getUser();
 
   // Redirect signed-in users directly to home
-  if (data.session) {
+  if (user) {
     redirect('/home');
   }
   
