@@ -18,31 +18,30 @@ export async function GET(request: NextRequest) {
   }
 
   if (code) {
-    try {
-      const cookieStore = await cookies();
-      const supabase = createRouteHandlerClient({ cookies: () => cookieStore });
-      const { error: exchangeError } = await supabase.auth.exchangeCodeForSession(code);
+
+
+    const cookieStore = cookies();
+    const supabase = createRouteHandlerClient({ cookies: () => cookieStore });
+    const { data: { user } } = await supabase.auth.exchangeCodeForSession(code);
+    
+    if (user) {
+      console.log(`🔐 [AUTH CALLBACK] User logged in successfully!`);
+      console.log(`🔐 [AUTH CALLBACK] User ID: ${user.id}`);
+      console.log(`🔐 [AUTH CALLBACK] User Email: ${user.email}`);
+      console.log(`🔐 [AUTH CALLBACK] User ID will be used for all document operations`);
+
       
-      if (exchangeError) {
-        console.error('Session exchange error:', exchangeError);
-        return NextResponse.redirect(`${requestUrl.origin}/?error=session_exchange_failed`);
-      }
+      // Store user ID in a cookie for persistence
+      const response = NextResponse.redirect(`${requestUrl.origin}/home`);
+      response.cookies.set('user-id', user.id, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+        maxAge: 60 * 60 * 24 * 7 // 7 days
+      });
+      
+      return response;
 
-      // Verify session was created successfully
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) {
-        console.error('No session created after code exchange');
-        return NextResponse.redirect(`${requestUrl.origin}/?error=no_session_created`);
-      }
-
-      // Small delay to ensure session is properly established
-      await new Promise(resolve => setTimeout(resolve, 100));
-
-      // URL to redirect to after sign in process completes
-      return NextResponse.redirect(`${requestUrl.origin}/home`);
-    } catch (error) {
-      console.error('Auth callback error:', error);
-      return NextResponse.redirect(`${requestUrl.origin}/?error=auth_callback_failed`);
     }
   }
 

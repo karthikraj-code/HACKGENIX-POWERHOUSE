@@ -43,7 +43,9 @@ const generateFlashcardsPrompt = ai.definePrompt({
   output: {schema: GenerateFlashcardsOutputSchema},
   prompt: `You are an expert educator who can create helpful flashcards on any subject.
 
-  Generate {{numberOfCards}} flashcards on the topic of {{{topic}}}. Each flashcard should have a front (question/keyword) and a back (answer/explanation).
+  Generate EXACTLY {{numberOfCards}} flashcards on the topic of {{{topic}}}. Each flashcard should have a front (question/keyword) and a back (answer/explanation).
+
+  IMPORTANT: You must generate EXACTLY {{numberOfCards}} flashcards - no more, no less.
 
   The flashcards should be formatted as a JSON array of objects, where each object has a "front" and "back" field.
   `,

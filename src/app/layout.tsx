@@ -14,11 +14,12 @@ export const metadata: Metadata = {
 };
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  const cookieStore = await cookies();
   const supabase = createServerComponentClient({
-    cookies,
+    cookies: () => cookieStore,
   });
 
-  const { data: { session } } = await supabase.auth.getSession();
+  const { data: { user } } = await supabase.auth.getUser();
 
   return (
     <html lang="en" suppressHydrationWarning>
@@ -28,10 +29,10 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet" />
       </head>
   <body suppressHydrationWarning={true} className={cn('font-body antialiased min-h-screen flex flex-col')}>
-  {session && <Header session={session} />}
+  {user && <Header session={{ user }} />}
   <main className="flex-1">{children}</main>
   <Toaster />
-  {session && <TechNewsBot />}
+  {user && <TechNewsBot />}
 </body>
 
     </html>

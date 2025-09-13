@@ -7,17 +7,16 @@ import { QuizDebug } from "@/components/quiz-debug";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 export default async function ProfilePage() {
+  const cookieStore = await cookies();
   const supabase = createServerComponentClient({
-    cookies,
+    cookies: () => cookieStore,
   });
 
-  const { data } = await supabase.auth.getSession();
+  const { data: { user } } = await supabase.auth.getUser();
 
-  if (!data.session) {
+  if (!user) {
     redirect("/auth");
   }
-
-  const user = data.session.user;
 
   return (
     <div className="container mx-auto px-4 py-8 md:py-16">
