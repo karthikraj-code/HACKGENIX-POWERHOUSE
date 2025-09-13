@@ -34,10 +34,25 @@ export function QuizProgressGraph({ userId }: QuizProgressGraphProps) {
   useEffect(() => {
     const fetchQuizStats = async () => {
       try {
+        console.log('🔍 QuizProgressGraph: Starting to fetch quiz stats for user:', userId);
         const stats = await getUserQuizStats(userId);
+        console.log('✅ QuizProgressGraph: Successfully fetched quiz stats:', stats);
         setQuizStats(stats);
       } catch (error) {
-        console.error('Error fetching quiz stats:', error);
+        console.error('❌ QuizProgressGraph: Error fetching quiz stats:', error);
+        console.error('❌ QuizProgressGraph: Error details:', {
+          message: error instanceof Error ? error.message : 'Unknown error',
+          stack: error instanceof Error ? error.stack : undefined,
+          userId
+        });
+        // Set default stats on error
+        setQuizStats({
+          totalQuizzes: 0,
+          averageScore: 0,
+          bestScore: 0,
+          recentScores: [],
+          improvementTrend: 'stable'
+        });
       } finally {
         setLoading(false);
       }

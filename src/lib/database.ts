@@ -56,11 +56,16 @@ export async function updateUserAnalytics(userId: string, data: CareerAdvisorDat
     const supabase = createClient();
     
     // Get current analytics
-    const { data: currentAnalytics } = await supabase
+    const { data: currentAnalytics, error: analyticsError } = await supabase
       .from('user_analytics')
       .select('*')
       .eq('user_id', userId)
       .single();
+
+    // If no analytics exist (PGRST116), that's normal for new users
+    if (analyticsError && analyticsError.code !== 'PGRST116') {
+      console.error('Error fetching current analytics:', analyticsError);
+    }
 
     const updateData = {
       user_id: userId,
@@ -182,8 +187,78 @@ export async function getUserQuizStats(userId: string): Promise<{
   improvementTrend: 'improving' | 'declining' | 'stable';
 }> {
   try {
+    console.log('🔍 Getting quiz stats for user:', userId);
+    
+    if (!userId) {
+      console.error('❌ No userId provided to getUserQuizStats');
+      return {
+        totalQuizzes: 0,
+        averageScore: 0,
+        bestScore: 0,
+        recentScores: [],
+        improvementTrend: 'stable'
+      };
+    }
+    
     const supabase = createClient();
     
+    if (!supabase) {
+      console.error('❌ Failed to create Supabase client');
+      return {
+        totalQuizzes: 0,
+        averageScore: 0,
+        bestScore: 0,
+        recentScores: [],
+        improvementTrend: 'stable'
+      };
+    }
+    
+    // Check if user_analytics table exists by trying a simple query
+    console.log('🔍 Checking if user_analytics table exists...');
+    const { error: tableCheckError } = await supabase
+      .from('user_analytics')
+      .select('user_id')
+      .limit(1);
+    
+    if (tableCheckError) {
+      console.error('❌ user_analytics table check failed:', tableCheckError);
+      if (tableCheckError.code === 'PGRST116' || tableCheckError.message?.includes('relation') || tableCheckError.message?.includes('does not exist')) {
+        console.error('❌ user_analytics table does not exist. Please run database migrations.');
+        return {
+          totalQuizzes: 0,
+          averageScore: 0,
+          bestScore: 0,
+          recentScores: [],
+          improvementTrend: 'stable'
+        };
+      }
+    } else {
+      console.log('✅ user_analytics table exists');
+    }
+    
+    // Check if quiz_scores table exists
+    console.log('🔍 Checking if quiz_scores table exists...');
+    const { error: quizTableCheckError } = await supabase
+      .from('quiz_scores')
+      .select('id')
+      .limit(1);
+    
+    if (quizTableCheckError) {
+      console.error('❌ quiz_scores table check failed:', quizTableCheckError);
+      if (quizTableCheckError.code === 'PGRST116' || quizTableCheckError.message?.includes('relation') || quizTableCheckError.message?.includes('does not exist')) {
+        console.error('❌ quiz_scores table does not exist. Please run database migrations.');
+        return {
+          totalQuizzes: 0,
+          averageScore: 0,
+          bestScore: 0,
+          recentScores: [],
+          improvementTrend: 'stable'
+        };
+      }
+    } else {
+      console.log('✅ quiz_scores table exists');
+    }
+
     // Get recent scores for trend analysis
     const { data: recentScores, error: scoresError } = await supabase
       .from('quiz_scores')
@@ -194,6 +269,13 @@ export async function getUserQuizStats(userId: string): Promise<{
 
     if (scoresError) {
       console.error('Error fetching recent quiz scores:', scoresError);
+      console.error('Quiz scores error details:', {
+        message: scoresError.message || 'No message',
+        details: scoresError.details || 'No details',
+        hint: scoresError.hint || 'No hint',
+        code: scoresError.code || 'No code',
+        fullError: JSON.stringify(scoresError, null, 2)
+      });
       return {
         totalQuizzes: 0,
         averageScore: 0,
@@ -204,6 +286,7 @@ export async function getUserQuizStats(userId: string): Promise<{
     }
 
     // Get analytics data
+    console.log('🔍 Fetching analytics for user:', userId);
     let { data: analytics, error: analyticsError } = await supabase
       .from('user_analytics')
       .select('total_quiz_sessions, average_quiz_score, best_quiz_score')
@@ -212,22 +295,42 @@ export async function getUserQuizStats(userId: string): Promise<{
 
     if (analyticsError) {
       console.error('Error fetching quiz analytics:', analyticsError);
+      console.error('Analytics error details:', {
+        message: analyticsError.message || 'No message',
+        details: analyticsError.details || 'No details',
+        hint: analyticsError.hint || 'No hint',
+        code: analyticsError.code || 'No code',
+        fullError: JSON.stringify(analyticsError, null, 2)
+      });
+      
+      // If the error is "no rows returned" (PGRST116), this means the user has no analytics data yet
+      if (analyticsError.code === 'PGRST116') {
+        console.log('ℹ️ No analytics data found for user - this is normal for new users');
+        analytics = null; // Set analytics to null so we handle it gracefully below
+      }
+    } else {
+      console.log('✅ Analytics fetched successfully:', analytics);
     }
 
     // If analytics are missing or show 0 but we have quiz scores, recalculate
     if ((!analytics || analytics.total_quiz_sessions === 0) && recentScores && recentScores.length > 0) {
       console.log('🔄 Recalculating quiz analytics from actual scores...');
-      await recalculateQuizAnalytics(userId);
-      
-      // Fetch updated analytics
-      const { data: updatedAnalytics } = await supabase
-        .from('user_analytics')
-        .select('total_quiz_sessions, average_quiz_score, best_quiz_score')
-        .eq('user_id', userId)
-        .single();
-      
-      if (updatedAnalytics) {
-        analytics = updatedAnalytics;
+      try {
+        await recalculateQuizAnalytics(userId);
+        
+        // Fetch updated analytics
+        const { data: updatedAnalytics } = await supabase
+          .from('user_analytics')
+          .select('total_quiz_sessions, average_quiz_score, best_quiz_score')
+          .eq('user_id', userId)
+          .single();
+        
+        if (updatedAnalytics) {
+          analytics = updatedAnalytics;
+        }
+      } catch (recalcError) {
+        console.error('Error recalculating quiz analytics:', recalcError);
+        // Continue with empty analytics rather than failing
       }
     }
 
@@ -244,21 +347,111 @@ export async function getUserQuizStats(userId: string): Promise<{
       }
     }
 
-    return {
+    const result = {
       totalQuizzes: analytics?.total_quiz_sessions || 0,
       averageScore: analytics?.average_quiz_score || 0,
       bestScore: analytics?.best_quiz_score || 0,
       recentScores: recentScores || [],
       improvementTrend
     };
+    
+    console.log('✅ Returning quiz stats:', result);
+    return result;
   } catch (error) {
     console.error('Error in getUserQuizStats:', error);
+    console.error('Error details:', {
+      message: error instanceof Error ? error.message : 'Unknown error',
+      stack: error instanceof Error ? error.stack : undefined,
+      userId,
+      errorType: typeof error,
+      errorString: String(error),
+      fullError: JSON.stringify(error, null, 2)
+    });
     return {
       totalQuizzes: 0,
       averageScore: 0,
       bestScore: 0,
       recentScores: [],
       improvementTrend: 'stable'
+    };
+  }
+}
+
+// Simple test function to check if database connection works
+export async function testDatabaseConnection(): Promise<{ success: boolean; error?: string }> {
+  try {
+    console.log('🔍 Testing database connection...');
+    const supabase = createClient();
+    
+    // Try a simple query to test connection
+    const { data, error } = await supabase
+      .from('user_analytics')
+      .select('user_id')
+      .limit(1);
+    
+    if (error) {
+      console.error('❌ Database connection test failed:', error);
+      return { success: false, error: error.message };
+    }
+    
+    console.log('✅ Database connection test successful');
+    return { success: true };
+  } catch (error) {
+    console.error('❌ Database connection test exception:', error);
+    return { 
+      success: false, 
+      error: error instanceof Error ? error.message : 'Unknown error' 
+    };
+  }
+}
+
+// Check if database tables exist and provide setup guidance
+export async function checkDatabaseSetup(): Promise<{ 
+  tablesExist: boolean; 
+  missingTables: string[]; 
+  setupInstructions: string 
+}> {
+  try {
+    const supabase = createClient();
+    const missingTables: string[] = [];
+    
+    // Check user_analytics table
+    const { error: analyticsError } = await supabase
+      .from('user_analytics')
+      .select('user_id')
+      .limit(1);
+    
+    if (analyticsError) {
+      if (analyticsError.code === 'PGRST116' || analyticsError.message?.includes('relation') || analyticsError.message?.includes('does not exist')) {
+        missingTables.push('user_analytics');
+      }
+    }
+    
+    // Check quiz_scores table
+    const { error: quizError } = await supabase
+      .from('quiz_scores')
+      .select('id')
+      .limit(1);
+    
+    if (quizError) {
+      if (quizError.code === 'PGRST116' || quizError.message?.includes('relation') || quizError.message?.includes('does not exist')) {
+        missingTables.push('quiz_scores');
+      }
+    }
+    
+    return {
+      tablesExist: missingTables.length === 0,
+      missingTables,
+      setupInstructions: missingTables.length > 0 
+        ? `Database tables missing: ${missingTables.join(', ')}. Please run the following migrations in your Supabase dashboard:\n1. 001_create_career_advisor_tables.sql\n2. 002_create_quiz_scores_table.sql`
+        : 'All required tables exist'
+    };
+  } catch (error) {
+    console.error('Error checking database setup:', error);
+    return {
+      tablesExist: false,
+      missingTables: ['unknown'],
+      setupInstructions: 'Error checking database setup. Please check your Supabase connection and run the required migrations.'
     };
   }
 }

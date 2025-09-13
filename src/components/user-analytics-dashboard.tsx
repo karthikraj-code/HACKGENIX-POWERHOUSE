@@ -38,27 +38,74 @@ export function UserAnalyticsDashboard({ userId }: UserAnalyticsDashboardProps) 
   useEffect(() => {
     const fetchData = async () => {
       try {
+        console.log('🔍 UserAnalyticsDashboard: Starting to fetch data for user:', userId);
+        
+        if (!userId) {
+          console.error('❌ UserAnalyticsDashboard: No userId provided');
+          setAnalytics(null);
+          setCareerHistory([]);
+          setLoading(false);
+          return;
+        }
+        
         const supabase = createClient();
         
+        if (!supabase) {
+          console.error('❌ UserAnalyticsDashboard: Failed to create Supabase client');
+          setAnalytics(null);
+          setCareerHistory([]);
+          setLoading(false);
+          return;
+        }
+        
         // Fetch user analytics
-        const { data: analyticsData } = await supabase
+        const { data: analyticsData, error: analyticsError } = await supabase
           .from('user_analytics')
           .select('*')
           .eq('user_id', userId)
           .single();
 
         // Fetch career advisor history
-        const { data: historyData } = await supabase
+        const { data: historyData, error: historyError } = await supabase
           .from('career_advisor_responses')
           .select('*')
           .eq('user_id', userId)
           .order('created_at', { ascending: false })
           .limit(5);
 
-        setAnalytics(analyticsData);
-        setCareerHistory(historyData || []);
+        // Handle analytics data - if no data exists (PGRST116), that's normal for new users
+        if (analyticsError && analyticsError.code === 'PGRST116') {
+          console.log('ℹ️ No analytics data found for user - this is normal for new users');
+          setAnalytics(null);
+        } else if (analyticsError) {
+          console.error('Error fetching analytics data:', analyticsError);
+          setAnalytics(null);
+        } else {
+          setAnalytics(analyticsData);
+        }
+
+        // Handle career history data
+        if (historyError && historyError.code === 'PGRST116') {
+          console.log('ℹ️ No career advisor history found for user - this is normal for new users');
+          setCareerHistory([]);
+        } else if (historyError) {
+          console.error('Error fetching career history:', historyError);
+          setCareerHistory([]);
+        } else {
+          setCareerHistory(historyData || []);
+        }
+        
+        console.log('✅ UserAnalyticsDashboard: Successfully fetched all data');
       } catch (error) {
-        console.error('Error fetching analytics data:', error);
+        console.error('❌ UserAnalyticsDashboard: Error fetching analytics data:', error);
+        console.error('❌ UserAnalyticsDashboard: Error details:', {
+          message: error instanceof Error ? error.message : 'Unknown error',
+          stack: error instanceof Error ? error.stack : undefined,
+          userId
+        });
+        // Set default values on error
+        setAnalytics(null);
+        setCareerHistory([]);
       } finally {
         setLoading(false);
       }
