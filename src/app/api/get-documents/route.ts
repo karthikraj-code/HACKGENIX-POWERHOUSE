@@ -31,8 +31,21 @@ export async function GET(request: NextRequest) {
       documents: documentList
     });
 
-  } catch (error) {
+  } catch (error: any) {
     console.error('❌ [API] Error getting documents:', error);
+    
+    // Handle authentication errors specifically
+    if (error.message === 'User not authenticated') {
+      return NextResponse.json(
+        { 
+          success: false, 
+          error: 'Authentication required',
+          documents: []
+        },
+        { status: 401 }
+      );
+    }
+    
     return NextResponse.json(
       { 
         success: false, 

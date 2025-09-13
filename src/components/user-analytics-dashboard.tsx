@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
@@ -313,13 +313,13 @@ export function UserAnalyticsDashboard({ userId }: UserAnalyticsDashboardProps) 
           </CardHeader>
           <CardContent>
             <div className="flex flex-wrap gap-2">
-              {analytics.top_interests?.map((interest, index) => (
+              {analytics.top_interests?.map((interest: string, index: number) => (
                 <Badge 
                   key={index} 
                   variant="secondary" 
                   className="text-sm bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200 hover:bg-amber-200 dark:hover:bg-amber-800 transition-colors"
                 >
-                  {interest.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                  {interest.replace(/-/g, ' ').replace(/\b\w/g, (l: string) => l.toUpperCase())}
                 </Badge>
               ))}
               {(!analytics.top_interests || analytics.top_interests.length === 0) && (
@@ -344,7 +344,7 @@ export function UserAnalyticsDashboard({ userId }: UserAnalyticsDashboardProps) 
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
-              {analytics.skill_gaps?.slice(0, 6).map((skill, index) => (
+              {analytics.skill_gaps?.slice(0, 6).map((skill: string, index: number) => (
                 <div key={index} className="flex items-center gap-3 p-2 rounded-lg bg-white/50 dark:bg-gray-800/50">
                   <div className="h-2 w-2 bg-gradient-to-r from-orange-400 to-red-500 rounded-full"></div>
                   <span className="text-sm font-medium flex-1">{skill}</span>
@@ -382,7 +382,7 @@ export function UserAnalyticsDashboard({ userId }: UserAnalyticsDashboardProps) 
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
-              {careerHistory.map((response, index) => {
+              {careerHistory.map((response: CareerAdvisorResponse, index: number) => {
                 const path = careerPaths.find(p => p.slug === response.recommended_path_slug);
                 const isLatest = index === 0;
                 return (
@@ -429,8 +429,8 @@ function AnalyticsSkeleton() {
     <div className="space-y-8">
       {/* Header */}
       <div className="text-center mb-8">
-        <Skeleton className="h-8 w-64 mx-auto mb-2" />
-        <Skeleton className="h-4 w-48 mx-auto" />
+        <Skeleton className="h-8 w-64 mx-auto mb-2" {...({} as any)} />
+        <Skeleton className="h-4 w-48 mx-auto" {...({} as any)} />
       </div>
 
       {/* Overview Cards */}
@@ -438,12 +438,12 @@ function AnalyticsSkeleton() {
         {Array.from({ length: 6 }).map((_, i) => (
           <Card key={i} className="hover:shadow-lg transition-all duration-300">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <Skeleton className="h-4 w-16" />
-              <Skeleton className="h-8 w-8 rounded-full" />
+              <Skeleton className="h-4 w-16" {...({} as any)} />
+              <Skeleton className="h-8 w-8 rounded-full" {...({} as any)} />
             </CardHeader>
             <CardContent>
-              <Skeleton className="h-8 w-12 mb-2" />
-              <Skeleton className="h-3 w-20" />
+              <Skeleton className="h-8 w-12 mb-2" {...({} as any)} />
+              <Skeleton className="h-3 w-20" {...({} as any)} />
             </CardContent>
           </Card>
         ))}
@@ -454,17 +454,17 @@ function AnalyticsSkeleton() {
         {Array.from({ length: 2 }).map((_, i) => (
           <Card key={i}>
             <CardHeader>
-              <Skeleton className="h-6 w-32" />
-              <Skeleton className="h-4 w-24" />
+              <Skeleton className="h-6 w-32" {...({} as any)} />
+              <Skeleton className="h-4 w-24" {...({} as any)} />
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
-                <Skeleton className="h-4 w-full mb-2" />
-                <Skeleton className="h-2 w-full" />
+                <Skeleton className="h-4 w-full mb-2" {...({} as any)} />
+                <Skeleton className="h-2 w-full" {...({} as any)} />
               </div>
               <div>
-                <Skeleton className="h-4 w-full mb-2" />
-                <Skeleton className="h-2 w-full" />
+                <Skeleton className="h-4 w-full mb-2" {...({} as any)} />
+                <Skeleton className="h-2 w-full" {...({} as any)} />
               </div>
             </CardContent>
           </Card>
@@ -475,11 +475,11 @@ function AnalyticsSkeleton() {
       <div className="space-y-6">
         <Card>
           <CardHeader>
-            <Skeleton className="h-6 w-48" />
-            <Skeleton className="h-4 w-64" />
+            <Skeleton className="h-6 w-48" {...({} as any)} />
+            <Skeleton className="h-4 w-64" {...({} as any)} />
           </CardHeader>
           <CardContent>
-            <Skeleton className="h-24 w-full" />
+            <Skeleton className="h-24 w-full" {...({} as any)} />
           </CardContent>
         </Card>
 
@@ -487,11 +487,11 @@ function AnalyticsSkeleton() {
           {Array.from({ length: 2 }).map((_, i) => (
             <Card key={i}>
               <CardHeader>
-                <Skeleton className="h-6 w-32" />
-                <Skeleton className="h-4 w-48" />
+                <Skeleton className="h-6 w-32" {...({} as any)} />
+                <Skeleton className="h-4 w-48" {...({} as any)} />
               </CardHeader>
               <CardContent>
-                <Skeleton className="h-20 w-full" />
+                <Skeleton className="h-20 w-full" {...({} as any)} />
               </CardContent>
             </Card>
           ))}

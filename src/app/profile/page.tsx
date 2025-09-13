@@ -1,3 +1,4 @@
+import React from "react";
 import { createServerComponentClient } from "@supabase/auth-helpers-nextjs";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
@@ -7,16 +8,17 @@ import { QuizDebug } from "@/components/quiz-debug";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 export default async function ProfilePage() {
-  const cookieStore = await cookies();
   const supabase = createServerComponentClient({
-    cookies: () => cookieStore,
+    cookies,
   });
 
-  const { data: { user } } = await supabase.auth.getUser();
+  const { data } = await supabase.auth.getSession();
 
-  if (!user) {
+  if (!data.session) {
     redirect("/auth");
   }
+
+  const user = data.session.user;
 
   return (
     <div className="container mx-auto px-4 py-8 md:py-16">
@@ -44,10 +46,8 @@ export default async function ProfilePage() {
         <QuizProgressGraph userId={user.id} />
 
         {/* Debug Component - Remove this after testing */}
-       
+        <QuizDebug />
       </div>
     </div>
   );
 }
-
-

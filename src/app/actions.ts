@@ -242,6 +242,12 @@ export async function storeDocument(input: {
     return { data: { documentId }, error: null };
   } catch (e: any) {
     console.error(e);
+    
+    // Handle authentication errors specifically
+    if (e.message === 'User not authenticated') {
+      return { data: null, error: 'Please sign in to upload documents.' };
+    }
+    
     return { data: null, error: e.message || 'Failed to store document.' };
   }
 }
@@ -284,6 +290,12 @@ export async function queryDocuments(input: {
     return { data: response, error: null };
   } catch (e: any) {
     console.error(e);
+    
+    // Handle authentication errors specifically
+    if (e.message === 'User not authenticated') {
+      return { data: null, error: 'Please sign in to query documents.' };
+    }
+    
     return { data: null, error: e.message || 'Failed to query documents.' };
   }
 }
@@ -299,6 +311,12 @@ export async function getDocumentsSummary() {
     return { data: summary, error: null };
   } catch (e: any) {
     console.error(e);
+    
+    // Handle authentication errors specifically
+    if (e.message === 'User not authenticated') {
+      return { data: null, error: 'Please sign in to view documents summary.' };
+    }
+    
     return { data: null, error: e.message || 'Failed to get documents summary.' };
   }
 }

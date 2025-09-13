@@ -69,11 +69,10 @@ export async function getUserIdWithFallback(): Promise<string> {
     return userId;
   }
   
-  // Fallback to a default user ID for development/testing
-  // In production, you might want to redirect to login instead
-  const fallbackUserId = 'default-user-id';
-  console.log(`⚠️ [AUTH] No authenticated user, using fallback ID: ${fallbackUserId}`);
-  return fallbackUserId;
+  // For unauthenticated users, return null instead of a fake UUID
+  // This will allow the calling code to handle the unauthenticated state properly
+  console.log(`⚠️ [AUTH] No authenticated user found`);
+  throw new Error('User not authenticated');
 }
 
 /**

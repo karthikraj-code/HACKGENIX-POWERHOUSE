@@ -6,8 +6,12 @@ import { Rocket, Sparkles, BrainCircuit, Layers, ShieldCheck, Workflow } from "l
 import { SignInButton } from "@/components/sign-in-button";
 import { ScrollAnimate } from "@/components/scroll-animate";
 
-export default async function LandingPage() {
-  const cookieStore = await cookies();
+export default async function LandingPage({
+  searchParams,
+}: {
+  searchParams: { [key: string]: string | string[] | undefined };
+}) {
+  const cookieStore = cookies();
   const supabase = createServerComponentClient({ cookies: () => cookieStore });
   const { data: { user } } = await supabase.auth.getUser();
 
@@ -337,16 +341,16 @@ export default async function LandingPage() {
               Explore domains, get AI-powered guidance, and turn learning into real projects with our cutting-edge platform.
             </p>
             <div className="mt-12 flex flex-col items-center justify-center gap-4">
-              {params.error && (
+              {searchParams.error && (
                 <div className="bg-red-500/20 border border-red-500/50 rounded-lg px-4 py-3 text-red-100 text-sm max-w-md text-center">
                   <div className="font-semibold">Authentication Error</div>
                   <div className="mt-1 text-xs opacity-90">
-                    {params.error === 'access_denied' && 'Access was denied. Please try again.'}
-                    {params.error === 'session_exchange_failed' && 'Session creation failed. Please try again.'}
-                    {params.error === 'no_session_created' && 'Authentication completed but session was not created.'}
-                    {params.error === 'auth_callback_failed' && 'Authentication callback failed. Please try again.'}
-                    {!['access_denied', 'session_exchange_failed', 'no_session_created', 'auth_callback_failed'].includes(params.error) && 
-                      `Error: ${params.error}${params.description ? ` - ${params.description}` : ''}`}
+                    {searchParams.error === 'access_denied' && 'Access was denied. Please try again.'}
+                    {searchParams.error === 'session_exchange_failed' && 'Session creation failed. Please try again.'}
+                    {searchParams.error === 'no_session_created' && 'Authentication completed but session was not created.'}
+                    {searchParams.error === 'auth_callback_failed' && 'Authentication callback failed. Please try again.'}
+                    {!['access_denied', 'session_exchange_failed', 'no_session_created', 'auth_callback_failed'].includes(searchParams.error as string) && 
+                      `Error: ${searchParams.error}${searchParams.description ? ` - ${searchParams.description}` : ''}`}
                   </div>
                 </div>
               )}
@@ -361,7 +365,7 @@ export default async function LandingPage() {
       {/* Enhanced Features Section */}
       <section className="relative py-20 bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 dark:from-slate-900 dark:via-blue-900 dark:to-indigo-900">
         <div className="container mx-auto px-4">
-          <ScrollAnimate animation="up" className="text-center mb-16">
+          <ScrollAnimate animation="up" className="text-center mb-16" {...({} as any)}>
             <h2 className="text-4xl md:text-5xl font-headline font-bold gradient-text mb-4">
               Supercharge Your Learning
             </h2>
@@ -371,7 +375,7 @@ export default async function LandingPage() {
           </ScrollAnimate>
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <ScrollAnimate animation="left" delay={100}>
+            <ScrollAnimate animation="left" delay={100} {...({} as any)}>
               <FeatureCard 
                 icon={<Rocket className="h-8 w-8 text-blue-500" />} 
                 title="Guided Roadmaps" 
@@ -379,7 +383,7 @@ export default async function LandingPage() {
                 gradient="from-blue-500 to-purple-600"
               />
             </ScrollAnimate>
-            <ScrollAnimate animation="up" delay={200}>
+            <ScrollAnimate animation="up" delay={200} {...({} as any)}>
               <FeatureCard 
                 icon={<BrainCircuit className="h-8 w-8 text-emerald-500" />} 
                 title="AI Assistance" 
@@ -387,7 +391,7 @@ export default async function LandingPage() {
                 gradient="from-emerald-500 to-teal-600"
               />
             </ScrollAnimate>
-            <ScrollAnimate animation="right" delay={300}>
+            <ScrollAnimate animation="right" delay={300} {...({} as any)}>
               <FeatureCard 
                 icon={<Workflow className="h-8 w-8 text-purple-500" />} 
                 title="Project First" 
@@ -402,7 +406,7 @@ export default async function LandingPage() {
       {/* Enhanced How it works section */}
       <section className="relative py-20 bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 dark:from-indigo-900 dark:via-purple-900 dark:to-pink-900">
         <div className="container mx-auto px-4">
-          <ScrollAnimate animation="scale" className="text-center mb-16">
+          <ScrollAnimate animation="scale" className="text-center mb-16" {...({} as any)}>
             <h2 className="text-4xl md:text-5xl font-headline font-bold gradient-text mb-4">
               How It Works
             </h2>
@@ -412,7 +416,7 @@ export default async function LandingPage() {
           </ScrollAnimate>
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <ScrollAnimate animation="left" delay={100}>
+            <ScrollAnimate animation="left" delay={100} {...({} as any)}>
               <StepCard 
                 num="1" 
                 title="Pick a Domain" 
@@ -421,7 +425,7 @@ export default async function LandingPage() {
                 gradient="from-blue-400 to-blue-600"
               />
             </ScrollAnimate>
-            <ScrollAnimate animation="up" delay={200}>
+            <ScrollAnimate animation="up" delay={200} {...({} as any)}>
               <StepCard 
                 num="2" 
                 title="Follow the Roadmap" 
@@ -430,7 +434,7 @@ export default async function LandingPage() {
                 gradient="from-purple-400 to-purple-600"
               />
             </ScrollAnimate>
-            <ScrollAnimate animation="right" delay={300}>
+            <ScrollAnimate animation="right" delay={300} {...({} as any)}>
               <StepCard 
                 num="3" 
                 title="Build Projects" 
