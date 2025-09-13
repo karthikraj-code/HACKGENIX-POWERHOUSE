@@ -1,7 +1,7 @@
 'use client';
 
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 
 interface SignInButtonProps {
   redirectTo?: string;
@@ -20,21 +20,42 @@ export function SignInButton({
 }: SignInButtonProps = {}) {
   const [isLoading, setIsLoading] = useState(false);
   const supabase = createClientComponentClient();
+  const isProcessingRef = useRef(false);
 
   const signInWithGoogle = async () => {
-    if (disabled || isLoading) return;
+    if (disabled || isLoading || isProcessingRef.current) return;
 
     try {
+      isProcessingRef.current = true;
       setIsLoading(true);
+      
+      // Check if Supabase is properly configured
+      const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+      const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+      
+      if (!supabaseUrl || !supabaseKey) {
+        throw new Error('Supabase configuration is missing. Please check your environment variables.');
+      }
+      
+      // Clear any existing session first
+      await supabase.auth.signOut();
+      
+      const redirectUrl = redirectTo || `${window.location.origin}/auth/callback`;
+      console.log('Attempting OAuth with redirect URL:', redirectUrl);
       
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: redirectTo || `${window.location.origin}/auth/callback`,
+          redirectTo: redirectUrl,
+          queryParams: {
+            access_type: 'offline',
+            prompt: 'consent',
+          },
         },
       });
 
       if (error) {
+        console.error('OAuth error details:', error);
         throw error;
       }
 
@@ -42,9 +63,10 @@ export function SignInButton({
     } catch (error) {
       console.error('Sign in error:', error);
       onError?.(error instanceof Error ? error : new Error('An unknown error occurred'));
-    } finally {
       setIsLoading(false);
+      isProcessingRef.current = false;
     }
+    // Don't reset loading state here as we're redirecting
   };
 
   const baseClassName = `

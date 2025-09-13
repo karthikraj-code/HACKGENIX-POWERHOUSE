@@ -5,11 +5,13 @@ import { redirect } from "next/navigation";
 import { Rocket, Sparkles, BrainCircuit, Layers, ShieldCheck, Workflow } from "lucide-react";
 import { SignInButton } from "@/components/sign-in-button";
 import { ScrollAnimate } from "@/components/scroll-animate";
+import { EnvCheck } from "@/components/env-check";
 
 export default async function LandingPage() {
   const cookieStore = await cookies();
   const supabase = createServerComponentClient({ cookies: () => cookieStore });
   const { data: { user } } = await supabase.auth.getUser();
+
 
   // Redirect signed-in users directly to home
   if (user) {
@@ -335,7 +337,20 @@ export default async function LandingPage() {
             <p className="mt-6 text-xl text-white/90 max-w-3xl mx-auto leading-relaxed drop-shadow-lg">
               Explore domains, get AI-powered guidance, and turn learning into real projects with our cutting-edge platform.
             </p>
-            <div className="mt-12 flex items-center justify-center gap-4">
+            <div className="mt-12 flex flex-col items-center justify-center gap-4">
+              {params.error && (
+                <div className="bg-red-500/20 border border-red-500/50 rounded-lg px-4 py-3 text-red-100 text-sm max-w-md text-center">
+                  <div className="font-semibold">Authentication Error</div>
+                  <div className="mt-1 text-xs opacity-90">
+                    {params.error === 'access_denied' && 'Access was denied. Please try again.'}
+                    {params.error === 'session_exchange_failed' && 'Session creation failed. Please try again.'}
+                    {params.error === 'no_session_created' && 'Authentication completed but session was not created.'}
+                    {params.error === 'auth_callback_failed' && 'Authentication callback failed. Please try again.'}
+                    {!['access_denied', 'session_exchange_failed', 'no_session_created', 'auth_callback_failed'].includes(params.error) && 
+                      `Error: ${params.error}${params.description ? ` - ${params.description}` : ''}`}
+                  </div>
+                </div>
+              )}
               <div className="group relative transition-all duration-300 hover:scale-105 hover:shadow-2xl">
                 <SignInButton />
               </div>
@@ -428,6 +443,9 @@ export default async function LandingPage() {
           </div>
         </div>
       </section>
+      
+      {/* Environment Check - Remove in production */}
+      <EnvCheck />
     </>
   );
 }

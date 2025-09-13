@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
+import { useState } from 'react';
 import { Button } from './ui/button';
 import { Sheet, SheetContent, SheetTrigger, SheetClose, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from '@/components/ui/dropdown-menu';
@@ -30,10 +31,41 @@ export function Header({ session }: HeaderProps) {
   const pathname = usePathname();
   const router = useRouter();
   const supabase = createClientComponentClient();
+  const [isSigningOut, setIsSigningOut] = useState(false);
 
   const handleSignOut = async () => {
-    await supabase.auth.signOut();
-    router.refresh();
+    if (isSigningOut) return; // Prevent multiple clicks
+    
+    try {
+      setIsSigningOut(true);
+      
+      // Call the dedicated sign-out route
+      const response = await fetch('/auth/signout', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        console.error('Sign out request failed');
+      }
+      
+      // Clear any local storage
+      localStorage.clear();
+      sessionStorage.clear();
+      
+      // Force a hard redirect to ensure clean state
+      window.location.href = '/';
+    } catch (error) {
+      console.error('Sign out failed:', error);
+      // Fallback: clear storage and force redirect
+      localStorage.clear();
+      sessionStorage.clear();
+      window.location.href = '/';
+    } finally {
+      setIsSigningOut(false);
+    }
   };
 
   return (
@@ -93,9 +125,9 @@ export function Header({ session }: HeaderProps) {
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={handleSignOut} className="flex items-center gap-2">
+                <DropdownMenuItem onClick={handleSignOut} className="flex items-center gap-2" disabled={isSigningOut}>
                   <LogOut className="h-4 w-4" />
-                  Sign Out
+                  {isSigningOut ? 'Signing out...' : 'Sign Out'}
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -158,9 +190,9 @@ export function Header({ session }: HeaderProps) {
                       </Link>
                     </SheetClose>
                     <SheetClose asChild>
-                      <Button variant="ghost" onClick={handleSignOut} className="text-red-600 hover:text-red-600">
+                      <Button variant="ghost" onClick={handleSignOut} className="text-red-600 hover:text-red-600" disabled={isSigningOut}>
                         <LogOut className="h-5 w-5 mr-2" />
-                        Sign Out
+                        {isSigningOut ? 'Signing out...' : 'Sign Out'}
                       </Button>
                     </SheetClose>
                   </>

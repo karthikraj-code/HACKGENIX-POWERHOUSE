@@ -7,8 +7,18 @@ import type { NextRequest } from 'next/server';
 export async function GET(request: NextRequest) {
   const requestUrl = new URL(request.url);
   const code = requestUrl.searchParams.get('code');
+  const error = requestUrl.searchParams.get('error');
+  const errorDescription = requestUrl.searchParams.get('error_description');
+
+  console.log('Auth callback received:', { code: !!code, error, errorDescription, origin: requestUrl.origin });
+
+  if (error) {
+    console.error('OAuth error:', error, errorDescription);
+    return NextResponse.redirect(`${requestUrl.origin}/?error=${encodeURIComponent(error)}&description=${encodeURIComponent(errorDescription || '')}`);
+  }
 
   if (code) {
+
     const cookieStore = await cookies();
     const supabase = createRouteHandlerClient({ cookies: () => cookieStore });
     const { data: { user } } = await supabase.auth.exchangeCodeForSession(code);
@@ -29,9 +39,10 @@ export async function GET(request: NextRequest) {
       });
       
       return response;
+
     }
   }
 
-  // URL to redirect to after sign in process completes
+  // If no code, redirect to home anyway (might be a refresh)
   return NextResponse.redirect(`${requestUrl.origin}/home`);
 }
