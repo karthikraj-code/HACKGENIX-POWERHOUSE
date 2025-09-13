@@ -64,10 +64,28 @@ Based on all the information, perform the following tasks:
 
 3.  **Analyze Skills**:
     - Compare the user's "Current Skills" with the "Required Skills" for your recommended path.
-    - Identify which skills the user seems to have (possessed).
-    - Identify which skills the user seems to be missing.
+    - **IMPORTANT**: Match skills case-insensitively. For example, if user mentions "html", "css", "javascript", "python", "react", etc. in lowercase, match them to "HTML", "CSS", "JavaScript", "Python", "React", etc. from the required skills list.
+    - Identify which skills the user likely possesses (possessed) - use the exact case from the required skills list.
+    - Identify which skills the user seems to be missing - use the exact case from the required skills list.
     - The available skills to choose from are: {{json C.allPathSkills}}
     - Be realistic. If the user only mentions "Python", don't assume they also know "Pandas" and "NumPy" unless they state it.
+    - Consider common variations and abbreviations:
+      * "js" or "javascript" = "JavaScript"
+      * "node" or "nodejs" = "Node.js" 
+      * "sql" = "SQL"
+      * "html" = "HTML"
+      * "css" = "CSS"
+      * "react" = "React"
+      * "vue" = "Vue"
+      * "angular" = "Angular"
+      * "python" = "Python"
+      * "java" = "Java"
+      * "go" or "golang" = "Go"
+      * "docker" = "Docker"
+      * "kubernetes" or "k8s" = "Kubernetes"
+      * "aws" = "Cloud Platforms (AWS, GCP, Azure)"
+      * "git" = "Git"
+      * "figma" = "Figma"
 
 Return the final output in the required JSON format.
 `,

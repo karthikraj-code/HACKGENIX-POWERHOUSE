@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from './ui/button';
 import { Sheet, SheetContent, SheetTrigger, SheetClose, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from '@/components/ui/dropdown-menu';
@@ -32,6 +32,11 @@ export function Header({ session }: HeaderProps) {
   const router = useRouter();
   const supabase = createClientComponentClient();
   const [isSigningOut, setIsSigningOut] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const handleSignOut = async () => {
     if (isSigningOut) return; // Prevent multiple clicks
@@ -78,30 +83,20 @@ export function Header({ session }: HeaderProps) {
         
         {/* Desktop Navigation */}
         <nav className="hidden md:flex items-center gap-1">
-          <Button asChild variant="ghost">
-            <Link href="/career-paths" className="flex items-center gap-2"><Route/> Career Paths</Link>
-          </Button>
-          <Button asChild variant="ghost">
-            <Link href="/project-generator" className="flex items-center gap-2"><Sparkles/> Project Generator</Link>
-          </Button>
-          <Button asChild variant="ghost">
-            <Link href="/summarizer" className="flex items-center gap-2"><Book/> AI Summarizer</Link>
-          </Button>
-          <Button asChild variant="ghost">
-            <Link href="/flashcardandmindmaps" className="flex items-center gap-2"><Brain/> Flashcards & Mindmaps</Link>
-          </Button>
-          <Button asChild variant="ghost">
-            <Link href="/quizzes" className="flex items-center gap-2"><HelpCircle/> Quizzes</Link>
-          </Button>
-          <Button asChild variant="ghost">
-            <Link href="/languages">Programming Languages</Link>
-          </Button>
-          <Button asChild variant="ghost">
-            <Link href="/databases">Databases</Link>
-          </Button>
-          <Button asChild variant="ghost">
-            <Link href="/tools">Tools Explorer</Link>
-          </Button>
+          {navLinks.map((link) => (
+            <Button key={link.href} asChild variant="ghost">
+              <Link 
+                href={link.href} 
+                className={cn(
+                  "flex items-center gap-2",
+                  mounted && pathname === link.href && "bg-muted"
+                )}
+              >
+                <link.icon className="h-4 w-4" />
+                {link.label}
+              </Link>
+            </Button>
+          ))}
           {session ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -157,7 +152,7 @@ export function Header({ session }: HeaderProps) {
                         href={link.href}
                         className={cn(
                           "flex items-center gap-3 rounded-lg p-3 text-lg font-medium text-muted-foreground transition-all hover:text-primary",
-                          pathname === link.href && "bg-muted text-primary"
+                          mounted && pathname === link.href && "bg-muted text-primary"
                         )}
                       >
                         <link.icon className="h-5 w-5" />
@@ -182,7 +177,7 @@ export function Header({ session }: HeaderProps) {
                         href="/profile"
                         className={cn(
                           "flex items-center gap-3 rounded-lg p-3 text-lg font-medium text-muted-foreground transition-all hover:text-primary",
-                          pathname === "/profile" && "bg-muted text-primary"
+                          mounted && pathname === "/profile" && "bg-muted text-primary"
                         )}
                       >
                         <LayoutDashboard className="h-5 w-5" />

@@ -15,6 +15,8 @@ import { InterestsStep } from '@/components/career-advisor/interests-step';
 import { SkillsStep } from '@/components/career-advisor/skills-step';
 import { LearningStyleStep } from '@/components/career-advisor/learning-style-step';
 import { ResultsDisplay } from '@/components/career-advisor/results-display';
+import { createClient } from '@/lib/database';
+import { saveCareerAdvisorResponse } from '@/lib/database';
 
 const formSchema = z.object({
   interests: z.array(z.string()).min(1, 'Please select at least one interest.'),
@@ -66,18 +68,51 @@ export function CareerAdvisor() {
   const onSubmit = async (data: FormValues) => {
     setIsLoading(true);
     setResults(null);
-    const response = await getCareerAdvice(data);
-    setIsLoading(false);
-
-    if (response.error) {
+    
+    try {
+      const response = await getCareerAdvice(data);
+      
+      if (response.error) {
+        toast({
+          variant: 'destructive',
+          title: 'Error',
+          description: response.error,
+        });
+        setIsLoading(false);
+        return;
+      }
+      
+      if (response.data) {
+        setResults(response.data);
+        setCurrentStep(steps.length); // Move to results view
+        
+        // Save to database
+        const supabase = createClient();
+        const { data: { user } } = await supabase.auth.getUser();
+        
+        if (user) {
+          const saveResult = await saveCareerAdvisorResponse({
+            interests: data.interests,
+            currentSkills: data.currentSkills,
+            learningStyle: data.learningStyle,
+            results: response.data,
+          }, user.id);
+          
+          if (!saveResult.success) {
+            console.error('Failed to save career advisor data:', saveResult.error);
+            // Don't show error to user as the main functionality still works
+          }
+        }
+      }
+    } catch (error) {
+      console.error('Error in career advisor submission:', error);
       toast({
         variant: 'destructive',
         title: 'Error',
-        description: response.error,
+        description: 'An unexpected error occurred. Please try again.',
       });
-    } else if (response.data) {
-      setResults(response.data);
-      setCurrentStep(steps.length); // Move to results view
+    } finally {
+      setIsLoading(false);
     }
   };
 

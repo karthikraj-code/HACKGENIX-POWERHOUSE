@@ -5,7 +5,6 @@ import { redirect } from "next/navigation";
 import { Rocket, Sparkles, BrainCircuit, Layers, ShieldCheck, Workflow } from "lucide-react";
 import { SignInButton } from "@/components/sign-in-button";
 import { ScrollAnimate } from "@/components/scroll-animate";
-import { EnvCheck } from "@/components/env-check";
 
 export default async function LandingPage({
   searchParams,
@@ -446,9 +445,6 @@ export default async function LandingPage({
           </div>
         </div>
       </section>
-      
-      {/* Environment Check - Remove in production */}
-      <EnvCheck />
     </>
   );
 }
